@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Cybersecurity App{% endblock %}
+
+{% block content %}
+<div class="card p-4">
+  <h2 class="text-center">Welcome, {{ user.username }}!</h2>
+  <p class="text-center text-muted">This is your secure dashboard.</p>
+
+  {% if user.role == 'admin' %}
+    <hr>
+    <h3>Admin Panel</h3>
+    <p>You can add, update, and delete data.</p>
+    <!-- Add admin CRUD buttons or links here -->
+  {% else %}
+    <hr>
+    <h3>User Panel</h3>
+    <p>You have read-only access.</p>
+  {% endif %}
+</div>
+{% endblock %}
