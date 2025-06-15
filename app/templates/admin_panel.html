@@ -1,37 +1,347 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Manage Threats</h2>
+<h2>Manage Database Tables</h2>
 
-<!-- Insert Form -->
-<form action="{{ url_for('main.insert_threat') }}" method="POST">
-  <input type="text" name="id" placeholder="ID" required>
-  <input type="text" name="name" placeholder="Name" required>
-  <input type="text" name="description" placeholder="Description" required>
-  <button type="submit">Add Threat</button>
-</form>
+<!-- Single toggle box for Threats -->
+<div id="threats-toggle" class="toggle-box">
+  <strong>Threats</strong>
+</div>
 
-<hr>
+<!-- Full Threats panel, hidden initially -->
+<div id="threats-panel" class="panel" style="display:none;">
+  <!-- Search Threat Form -->
+  <div class="search-container">
+    <form method="get" action="{{ url_for('main.admin_panel') }}" class="search-form">
+      <div class="search-input-group">
+        <input type="text" name="threat_search" placeholder="Search threats by ID, type, or description..." 
+               value="{{ threat_search or '' }}" class="search-input">
+        <button type="submit" class="search-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          Search
+        </button>
+      </div>
+    </form>
+    
+    {% if threat_search %}
+      <div class="search-results-info">
+        <p>Showing threat results for: <strong>"{{ threat_search }}"</strong></p>
+        <a href="{{ url_for('main.admin_panel') }}" class="clear-search">Clear Search</a>
+      </div>
+    {% endif %}
+  </div>
 
-<!-- Existing Threats -->
-<table border="1" cellpadding="5" cellspacing="0">
-  <tr>
-    <th>ID</th><th>Name</th><th>Description</th><th>Actions</th>
-  </tr>
-  {% for threat in threats %}
-  <tr>
+  <!-- Existing threats table with checkboxes -->
+  <div class="threats-table">
+    <h3>Current Threats</h3>
+    {% if threats %}
+    <table id="threats-table">
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Threat ID</th>
+          <th>Threat Type</th>
+          <th>Description</th>
+          <th>Date Detected</th>
+          <th>Risk ID</th>
+          <th>Malware ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for threat in threats %}
+        <tr>
+          <td><input type="checkbox" class="threat-checkbox" 
+                     data-threat_id="{{ threat.threat_id }}" 
+                     data-threat_type="{{ threat.threat_type }}" 
+                     data-description="{{ threat.description }}" 
+                     data-date_detected="{{ threat.date_detected }}" 
+                     data-risk_id="{{ threat.risk_id }}" 
+                     data-malware_id="{{ threat.malware_id }}"></td>
+          <td>{{ threat.threat_id or 'N/A' }}</td>
+          <td>{{ threat.threat_type or 'N/A' }}</td>
+          <td>{{ threat.description or 'N/A' }}</td>
+          <td>{{ threat.date_detected or 'N/A' }}</td>
+          <td>{{ threat.risk_id or 'N/A' }}</td>
+          <td>{{ threat.malware_id or 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">
+      <p>No threats found in the database.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Add Threat Form -->
+  <div class="operation-form" id="add-threat-form">
+    <h3>Add New Threat</h3>
+    <form action="{{ url_for('main.insert_threat') }}" method="POST">
+      <div class="form-row">
+        <input type="text" name="threat_id" placeholder="Threat ID" required>
+        <input type="text" name="threat_type" placeholder="Threat Type" required>
+        <input type="text" name="description" placeholder="Description" required>
+        <input type="datetime-local" name="date_detected" placeholder="Date Detected" required>
+        <input type="number" name="risk_id" placeholder="Risk ID" required>
+        <input type="number" name="malware_id" placeholder="Malware ID" required>
+        <button type="submit" class="btn-add">Add Threat</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Update Threat Form -->
+  <div class="operation-form" id="update-threat-form" style="display:none;">
+    <h3>Update Threat</h3>
     <form action="{{ url_for('main.update_threat') }}" method="POST">
-      <td><input type="text" name="id" value="{{ threat.ID }}" readonly></td>
-      <td><input type="text" name="name" value="{{ threat.NAME }}"></td>
-      <td><input type="text" name="description" value="{{ threat.DESCRIPTION }}"></td>
-      <td>
-        <button type="submit">Update</button>
+      <div class="form-row">
+        <input type="text" name="threat_id" id="update-threat_id" placeholder="Threat ID to Update" required>
+        <input type="text" name="threat_type" id="update-threat_type" placeholder="New Threat Type" required>
+        <input type="text" name="description" id="update-description" placeholder="New Description" required>
+        <input type="datetime-local" name="date_detected" id="update-date_detected" placeholder="New Date Detected" required>
+        <input type="number" name="risk_id" id="update-risk_id" placeholder="New Risk ID" required>
+        <input type="number" name="malware_id" id="update-malware_id" placeholder="New Malware ID" required>
+        <button type="submit" class="btn-update">Update Threat</button>
+      </div>
     </form>
-    <form action="{{ url_for('main.delete_threat') }}" method="POST" style="display:inline;">
-      <input type="hidden" name="id" value="{{ threat.ID }}">
-      <button type="submit" onclick="return confirm('Delete this threat?');">Delete</button>
+  </div>
+
+  <!-- Delete Threat Form -->
+  <div class="operation-form" id="delete-threat-form" style="display:none;">
+    <h3>Delete Threat</h3>
+    <form action="{{ url_for('main.delete_threat') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this threat?');">
+      <div class="form-row">
+        <input type="text" name="threat_id" id="delete-threat_id" placeholder="Threat ID to Delete" required>
+        <button type="submit" class="btn-delete">Delete Threat</button>
+      </div>
     </form>
-      </td>
-  </tr>
-  {% endfor %}
-</table>
-{% endblock %}
+  </div>
+</div>
+
+<!-- Single toggle box for Risks -->
+<div id="risks-toggle" class="toggle-box">
+  <strong>Risks</strong>
+</div>
+
+<!-- Full Risks panel, hidden initially -->
+<div id="risks-panel" class="panel" style="display:none;">
+  <!-- Search Risk Form -->
+  <div class="search-container">
+    <form method="get" action="{{ url_for('main.admin_panel') }}" class="search-form">
+      <div class="search-input-group">
+        <input type="text" name="risk_search" placeholder="Search risks by ID, name, or level..." 
+               value="{{ risk_search or '' }}" class="search-input">
+        <button type="submit" class="search-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          Search
+        </button>
+      </div>
+    </form>
+    
+    {% if risk_search %}
+      <div class="search-results-info">
+        <p>Showing risk results for: <strong>"{{ risk_search }}"</strong></p>
+        <a href="{{ url_for('main.admin_panel') }}" class="clear-search">Clear Search</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Existing risks table with checkboxes -->
+  <div class="risks-table">
+    <h3>Current Risks</h3>
+    {% if risks %}
+    <table id="risks-table">
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Risk ID</th>
+          <th>Risk Name</th>
+          <th>Risk Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for risk in risks %}
+        <tr>
+          <td><input type="checkbox" class="risk-checkbox"
+                     data-risk_id="{{ risk.risk_id }}"
+                     data-risk_name="{{ risk.risk_name }}"
+                     data-risk_level="{{ risk.risk_level }}"></td>
+          <td>{{ risk.risk_id or 'N/A' }}</td>
+          <td>{{ risk.risk_name or 'N/A' }}</td>
+          <td>{{ risk.risk_level or 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">
+      <p>No risks found in the database.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Add Risk Form -->
+  <div class="operation-form" id="add-risk-form">
+    <h3>Add New Risk</h3>
+    <form action="{{ url_for('main.insert_risk') }}" method="POST">
+      <div class="form-row">
+        <input type="text" name="risk_id" placeholder="Risk ID (optional)">
+        <input type="text" name="risk_name" placeholder="Risk Name" required>
+        <input type="text" name="risk_level" placeholder="Risk Level" required>
+        <button type="submit" class="btn-add">Add Risk</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Update Risk Form -->
+  <div class="operation-form" id="update-risk-form" style="display:none;">
+    <h3>Update Risk</h3>
+    <form action="{{ url_for('main.update_risk') }}" method="POST">
+      <div class="form-row">
+        <input type="text" name="risk_id" id="update-risk-id" placeholder="Risk ID" required>
+        <input type="text" name="risk_name" id="update-risk-name" placeholder="New Risk Name" required>
+        <input type="text" name="risk_level" id="update-risk-level" placeholder="New Risk Level" required>
+        <button type="submit" class="btn-update">Update Risk</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Delete Risk Form -->
+  <div class="operation-form" id="delete-risk-form" style="display:none;">
+    <h3>Delete Risk</h3>
+    <form action="{{ url_for('main.delete_risk') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this risk?');">
+      <div class="form-row">
+        <input type="text" name="risk_id" id="delete-risk-id" placeholder="Risk ID" required>
+        <button type="submit" class="btn-delete">Delete Risk</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Threats panel toggle functionality
+  const threatsToggle = document.getElementById('threats-toggle');
+  const threatsPanel = document.getElementById('threats-panel');
+
+  // Show panel on hover over toggle box
+  threatsToggle.addEventListener('mouseenter', () => {
+    threatsPanel.style.display = 'block';
+      });
+  </script>
+  {% endblock %}
+
+  // Hide panel when mouse leaves panel and toggle box
+  let threatsHideTimeout;
+  function scheduleThreatsHide() {
+    threatsHideTimeout = setTimeout(() => {
+      threatsPanel.style.display = 'none';
+    }, 300); // delay to allow moving between toggle and panel
+  }
+  function cancelThreatsHide() {
+    clearTimeout(threatsHideTimeout);
+  }
+
+  threatsToggle.addEventListener('mouseleave', scheduleThreatsHide);
+  threatsPanel.addEventListener('mouseleave', scheduleThreatsHide);
+
+  threatsToggle.addEventListener('mouseenter', cancelThreatsHide);
+  threatsPanel.addEventListener('mouseenter', cancelThreatsHide);
+
+  // Risks panel toggle functionality
+  const risksToggle = document.getElementById('risks-toggle');
+  const risksPanel = document.getElementById('risks-panel');
+
+  // Show panel on hover over toggle box
+  risksToggle.addEventListener('mouseenter', () => {
+    risksPanel.style.display = 'block';
+  });
+
+  // Hide panel when mouse leaves panel and toggle box
+  let risksHideTimeout;
+  function scheduleRisksHide() {
+    risksHideTimeout = setTimeout(() => {
+      risksPanel.style.display = 'none';
+    }, 300); // delay to allow moving between toggle and panel
+  }
+  function cancelRisksHide() {
+    clearTimeout(risksHideTimeout);
+  }
+
+  risksToggle.addEventListener('mouseleave', scheduleRisksHide);
+  risksPanel.addEventListener('mouseleave', scheduleRisksHide);
+
+  risksToggle.addEventListener('mouseenter', cancelRisksHide);
+  risksPanel.addEventListener('mouseenter', cancelRisksHide);
+
+  // Threat checkbox logic
+  const threatCheckboxes = document.querySelectorAll('.threat-checkbox');
+  const threatUpdateForm = document.getElementById('update-threat-form');
+  const threatDeleteForm = document.getElementById('delete-threat-form');
+
+  threatCheckboxes.forEach(box => {
+    box.addEventListener('change', () => {
+      // Uncheck all other checkboxes (single selection)
+      threatCheckboxes.forEach(cb => {
+        if (cb !== box) cb.checked = false;
+      });
+
+      if (box.checked) {
+        // Populate update form fields
+        document.getElementById('update-threat_id').value = box.dataset.threat_id || '';
+        document.getElementById('update-threat_type').value = box.dataset.threat_type || '';
+        document.getElementById('update-description').value = box.dataset.description || '';
+        let dt = box.dataset.date_detected || '';
+        if (dt) {
+          dt = dt.replace(' ', 'T').slice(0,16);
+        }
+        document.getElementById('update-date_detected').value = dt;
+        document.getElementById('update-risk_id').value = box.dataset.risk_id || '';
+        document.getElementById('update-malware_id').value = box.dataset.malware_id || '';
+
+        // Populate delete form field
+        document.getElementById('delete-threat_id').value = box.dataset.threat_id || '';
+
+        // Show update and delete forms
+        threatUpdateForm.style.display = 'block';
+        threatDeleteForm.style.display = 'block';
+      } else {
+        threatUpdateForm.style.display = 'none';
+        threatDeleteForm.style.display = 'none';
+      }
+    });
+  });
+
+  // Risk checkbox logic
+  const riskCheckboxes = document.querySelectorAll('.risk-checkbox');
+  const riskUpdateForm = document.getElementById('update-risk-form');
+  const riskDeleteForm = document.getElementById('delete-risk-form');
+
+  riskCheckboxes.forEach(box => {
+    box.addEventListener('change', () => {
+      // Uncheck all other checkboxes (single selection)
+      riskCheckboxes.forEach(cb => {
+        if (cb !== box) cb.checked = false;
+      });
+
+      if (box.checked) {
+        // Populate update form fields
+        document.getElementById('update-risk-id').value = box.dataset.risk_id || '';
+        document.getElementById('update-risk-name').value = box.dataset.risk_name || '';
+        document.getElementById('update-risk-level').value = box.dataset.risk_level || '';
+
+        // Populate delete form field
+        document.getElementById('delete-risk-id').value = box.dataset.risk_id || '';
+
+        // Show update and delete forms
+        riskUpdateForm.style.display = 'block';
+        riskDeleteForm.style.display = 'block';
+      } else {
+        riskUpdateForm.style.display = 'none';
+        riskDeleteForm.style.display = 'none';
+      }
+    });

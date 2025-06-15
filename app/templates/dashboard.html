@@ -3,19 +3,53 @@
 {% block title %}Dashboard - Cybersecurity App{% endblock %}
 
 {% block content %}
-<div class="card p-4">
-  <h2 class="text-center">Welcome, {{ user.username }}!</h2>
-  <p class="text-center text-muted">This is your secure dashboard.</p>
+<div class="container mt-4">
+  <div class="card p-4">
+    <h2 class="text-center">Welcome, {{ current_user.username }}!</h2>
+    <p class="text-center text-muted">This is your secure dashboard.</p>
 
-  {% if user.role == 'admin' %}
     <hr>
-    <h3>Admin Panel</h3>
-    <p>You can add, update, and delete data.</p>
-    <!-- Add admin CRUD buttons or links here -->
-  {% else %}
+
+    {% if current_user.role == 'admin' %}
+      <div class="admin-section text-center">
+        <h3>Admin Controls</h3>
+        <p class="mb-4">You have full administrative privileges to manage all system data.</p>
+        <a href="{{ url_for('main.admin_panel') }}" class="btn btn-primary btn-lg">
+          Go to Admin Panel
+        </a>
+      </div>
+    {% else %}
+      <div class="user-section text-center">
+        <h3>User Controls</h3>
+        <p class="mb-4">You can search and view threat and risk information.</p>
+        <a href="{{ url_for('main.user_panel') }}" class="btn btn-primary btn-lg">
+          Go to User Panel
+        </a>
+      </div>
+    {% endif %}
+
     <hr>
-    <h3>User Panel</h3>
-    <p>You have read-only access.</p>
-  {% endif %}
+
+    <div class="quick-actions mt-4">
+      <h4 class="text-center mb-3">Quick Actions</h4>
+      <div class="d-flex justify-content-center gap-3">
+        {% if current_user.role == 'admin' %}
+          <a href="{{ url_for('main.admin_panel') }}?threat_search=" class="btn btn-outline-primary">
+            Manage Threats
+          </a>
+          <a href="{{ url_for('main.admin_panel') }}?risk_search=" class="btn btn-outline-primary">
+            Manage Risks
+          </a>
+        {% else %}
+          <a href="{{ url_for('main.user_panel') }}?table=threat&search=" class="btn btn-outline-primary">
+            Search Threats
+          </a>
+          <a href="{{ url_for('main.user_panel') }}?table=risk&search=" class="btn btn-outline-primary">
+            Search Risks
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
