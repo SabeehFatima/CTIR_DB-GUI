@@ -70,23 +70,38 @@ bash
 flask run --host=0.0.0.0 --port=5000
 Access: http://localhost:5000
 
-### Code Structure
-text
+## Code Structure
 ├── app/
-│   ├── __init__.py             # App factory
-│   ├── models.py               # 14 SQLAlchemy models
-│   ├── routes.py               # 25+ view functions
-│   ├── templates/
-│   │   ├── admin/              # 5 admin templates
-│   │   ├── user/               # 3 user templates
-│   │   └── auth/               # Auth templates
-│   └── static/
-│       ├── css/                # Custom styles
-│       └── js/                 # Interactive scripts
-├── migrations/                 # Alembic migrations
-├── tests/                      # Unit tests
-├── requirements.txt            # Dependencies
-└── README.md                   # This file
+│ ├── init.py # App factory
+│ ├── models.py # 14 SQLAlchemy models
+│ ├── routes.py # 25+ view functions
+│ ├── templates/
+│ │ ├── admin/ # Admin panel templates
+│ │ │ ├── admin_panel.html
+│ │ │ ├── threat_management.html
+│ │ │ └── risk_management.html
+│ │ ├── user/ # User panel templates
+│ │ │ ├── user_panel.html
+│ │ │ ├── search_results.html
+│ │ │ └── dashboard.html
+│ │ └── auth/ # Auth templates
+│ │ ├── login.html
+│ │ ├── register.html
+│ │ └── base.html
+│ └── static/
+│ ├── css/ # Custom styles
+│ │ ├── main.css
+│ │ └── admin.css
+│ └── js/ # Interactive scripts
+│ ├── main.js
+│ └── admin.js
+├── migrations/ # Alembic migrations
+├── tests/ # Unit tests
+│ ├── test_models.py
+│ ├── test_routes.py
+│ └── test_auth.py
+├── requirements.txt # Dependencies
+└── README.md 
 
 ### Usage Examples
 Admin Operations
