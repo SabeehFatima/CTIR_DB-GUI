@@ -38,24 +38,23 @@ Werkzeug==2.0.3
 WTForms==3.0.1
 psycopg2-binary==2.9.3
 
-text
 
 ## Installation Guide
 
 ### 1. Database Setup
-```bash
+Run these on bash
 # PostgreSQL
 sudo apt-get install postgresql postgresql-contrib
 sudo -u postgres createdb threat_db
 sudo -u postgres psql -c "CREATE USER db_user WITH PASSWORD 'securepassword';"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE threat_db TO db_user;"
-2. Application Installation
-bash
+
+### 2. Application Installation
 git clone https://github.com/group10/cyberthreat-system.git
 cd cyberthreat-system
 
+### Setup Virtual Environment
 venv\Scripts\activate    # Windows
-
 pip install -r requirements.txt
 
 ## Configure environment
@@ -88,26 +87,9 @@ text
 ├── tests/                      # Unit tests
 ├── requirements.txt            # Dependencies
 └── README.md                   # This file
-Database Schema
-Key tables:
-
-python
-class Threat(db.Model):
-    __tablename__ = 'threat'
-    threat_id = db.Column(db.Integer, primary_key=True)
-    threat_type = db.Column(db.String(100), nullable=False)
-    # ... (other columns)
-
-class Risk(db.Model):
-    __tablename__ = 'risk'
-    risk_id = db.Column(db.Integer, primary_key=True)
-    risk_name = db.Column(db.String(100), nullable=False)
-    # ... (other columns)
-Full ER Diagram: er_diagram.pdf
 
 ### Usage Examples
 Admin Operations
-python
 # Add new threat
 threat = Threat(
     threat_type="Phishing",
@@ -116,23 +98,22 @@ threat = Threat(
 )
 db.session.add(threat)
 db.session.commit()
-User Search
-sql
+
+### User Search
+
 -- Sample query from user panel
 SELECT * FROM vulnerability 
 WHERE description LIKE '%SQL injection%'
 ORDER BY published_date DESC
 LIMIT 10;
 
-Team Contributions
-Member	Role	Key Contributions
-John D.	Lead	Database design, Admin CRUD
-Sarah K.	Dev	User search, Authentication
-Alex M.	UI	Frontend templates, CSS
-License
-MIT License - See full license text
+## Team Contributions
 
-Copyright 2023 - Group 10 Cybersecurity Project
-
+| Member    | Role           | Key Contributions |
+|-----------|----------------|-------------------|
+| **Ejaz**  | Frontend Dev   | - Designed admin/user panel interfaces<br>- Implemented interactive CRUD forms<br>- Created search functionality UI |
+| **Tayyaba** | Frontend Dev  | - Built authentication screens (login/register)<br>- Developed dashboard layouts<br>- Optimized mobile responsiveness |
+| **Sabeeh** | Backend Dev   | - Implemented database models (14 tables)<br>- Created API endpoints for CRUD operations<br>- Developed role-based authentication system |
+| **Laiba**  | Project Integrator | - Merged frontend/backend components<br>- Resolved system dependencies<br>- Performed end-to-end testing<br>- Prepared deployment packages |
 
 
